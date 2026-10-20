@@ -21,6 +21,7 @@
     .panel-section[data-block="reveal"]{--block-accent:#647369;--block-tint:#f5f7f5;box-shadow:none}.panel-section[data-block="reveal"] .section-heading{min-height:32px;gap:7px;padding:4px 8px}.panel-section[data-block="reveal"] .section-label{font-size:12px;letter-spacing:0;font-weight:500}.panel-section[data-block="reveal"] .section-body{padding:6px 8px;gap:5px}.panel-section[data-block="reveal"] button{min-height:28px;padding:4px 6px;font-size:11px;line-height:1.4;font-weight:400;border-radius:5px;color:#596b60;background:#fbfcfb;border-color:#dfe5e1}.panel-section[data-block="reveal"] button:hover{background:#eff3f0}.reveal-progress{margin:0 0 0 auto;color:#78867c;font-size:10px;font-weight:400;font-variant-numeric:tabular-nums;white-space:nowrap}.reveal-controls{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px}.steps-group{display:flex;align-items:center;gap:8px}.steps-group button{flex:none}.steps-group .hint{font-size:10px;line-height:1.4;color:#829087}.panel-section[data-block="reveal"]:has(#reveal-body[hidden]) .section-heading{border-bottom:0;border-radius:9px}.stage:focus{outline:none}@media(pointer:coarse){.panel-section[data-block="reveal"] button{min-height:36px}}
     :root{--steps-width:min(270px,calc(100vw - 40px))}.steps-panel{position:fixed;left:0;top:0;bottom:0;width:var(--steps-width);display:flex;flex-direction:column;background:#f8faf9;border-right:1px solid #d2ded6;box-shadow:8px 0 28px #203c3014;z-index:10;transition:transform .18s ease,visibility .18s ease}.steps-panel.collapsed{transform:translateX(-100%);visibility:hidden;pointer-events:none}.steps-panel .panel-title{font-size:14px}.steps-page{padding:10px 12px 0;margin:0;color:#286551;font-size:12px;font-weight:700}.steps-list{list-style:none;margin:0;padding:10px;display:flex;flex-direction:column;gap:8px;overflow-y:auto;overscroll-behavior:contain;min-height:0;flex:1;scrollbar-width:thin}.step-row{display:flex;gap:5px;padding:5px;border:1px solid #dce5df;border-radius:9px;background:#fff}.step-row.selected{border-color:#438563;box-shadow:0 0 0 1px #438563;background:#edf6f0}.step-select{display:flex;flex-direction:column;gap:5px;flex:1;min-width:0;padding:5px;border:0;background:transparent;white-space:normal;text-align:left}.step-select:hover{background:#f0f6f2}.step-select strong{font-size:12px;color:#286551}.step-preview{display:block;width:100%;height:70px;object-fit:contain;background:#fff;border:1px solid #eaf0ec;border-radius:4px}.step-kinds{font-size:10px;color:#6d8073;line-height:1.5}.step-excerpt{font-size:12px;color:#385345;line-height:1.5;overflow-wrap:anywhere;max-height:54px;overflow:hidden}.step-moves{display:flex;flex-direction:column;gap:5px;flex:none}.step-moves button{width:29px;padding:4px;min-height:34px;color:#386c52}.steps-actions{padding:10px;border-top:1px solid #dce5df;background:#f0f5f1;display:flex;flex-direction:column;gap:7px}.steps-actions button{font-size:11px;padding:6px 3px}.steps-actions p{margin:0;font-size:11px;color:#657b6c;line-height:1.6}.steps-empty{margin:14px 12px;font-size:12px;color:#7b8d80;line-height:1.8}.steps-handle{position:fixed;left:0;top:50%;transform:translateY(-50%);z-index:11;width:34px;min-height:96px;padding:9px 5px;writing-mode:vertical-rl;border-radius:0 9px 9px 0;border-left:0;background:#fffffff5;color:#47735b;font-weight:700;box-shadow:3px 1px 12px #263d3012;transition:left .18s ease,right .18s ease}.steps-open .steps-handle{left:var(--steps-width)}body[data-panel-side="left"] .steps-panel{left:auto;right:0;border-right:0;border-left:1px solid #d2ded6;box-shadow:-8px 0 28px #203c3014}body[data-panel-side="left"] .steps-panel.collapsed{transform:translateX(100%)}body[data-panel-side="left"] .steps-handle{left:auto;right:0;border-left:1px solid #d7dedb;border-right:0;border-radius:9px 0 0 9px}body[data-panel-side="left"].steps-open .steps-handle{right:var(--steps-width)}.step-highlight{position:absolute;z-index:3;border:2px dashed #338bca;background:#338bca08;border-radius:5px;pointer-events:none}.step-highlight span{position:absolute;left:0;top:0;padding:2px 5px;border-radius:0 0 4px 0;background:#267bb7;color:#fff;font-size:11px;line-height:16px;white-space:nowrap}@media(prefers-reduced-motion:reduce){.steps-panel,.steps-handle{transition:none}}
     .panel-section[data-block="reveal"] .edit-switch{display:inline-flex;align-items:center;gap:6px;border-color:transparent;background:transparent}.switch-track{position:relative;display:block;flex:none;width:28px;height:16px;border-radius:8px;background:#b9c5bd}.switch-track::after{content:"";position:absolute;left:2px;top:2px;width:12px;height:12px;border-radius:50%;background:#fff;box-shadow:0 1px 2px #0002}.edit-switch[aria-checked="true"] .switch-track{background:#38705a}.edit-switch[aria-checked="true"] .switch-track::after{left:14px}
+    .folder-save-status{white-space:pre-line;overflow-wrap:anywhere;margin:0;font-size:11px;color:#657b6c;line-height:1.65}.folder-save-status.error{color:#a52b2b}.secondary-open{font-size:11px;color:#7c8981;min-height:28px;padding:4px 8px}.folder-picker{border:1px solid #d2ded6;border-radius:12px;padding:20px;width:min(520px,calc(100vw - 32px));max-height:80dvh;color:#263733;box-shadow:0 12px 60px #203c3030}.folder-picker::backdrop{background:#203c3055}.folder-picker h2{font-size:18px;margin:0 0 8px;overflow-wrap:anywhere}.folder-picker p{font-size:12px;color:#6a7d70;line-height:1.7}.folder-pdf-list{display:grid;gap:8px;max-height:45dvh;overflow:auto;margin:16px 0}.folder-pdf-list button{text-align:left;white-space:normal;overflow-wrap:anywhere;min-height:44px;padding:10px 12px}
   </style>
 </head>
 <body data-panel-side="right" class="panel-open">
@@ -29,7 +30,7 @@
     <div class="panel-head"><div class="panel-title">工具<small id="panel-mode">移出后自动收起</small></div><div class="head-buttons"><button id="panel-pin" aria-pressed="false" title="固定工具栏，关闭自动隐藏">固定</button><button id="panel-close" title="收起工具栏">收起</button></div></div>
     <div class="panel-body">
       <section class="panel-section" data-block="book" aria-label="教材与翻页"><div class="section-heading"><span class="section-icon" aria-hidden="true">▤</span><h2 class="section-label">教材与翻页</h2></div><div class="section-body">
-        <button id="open" class="open">打开 PDF</button><input id="file" type="file" accept="application/pdf,.pdf" hidden><span id="filename"></span>
+        <button id="open" class="open">打开 PDF</button><button id="open-file" class="secondary-open" title="只使用浏览器保存；如需随 U 盘携带，请打开教材文件夹">仅打开 PDF</button><input id="file" type="file" accept="application/pdf,.pdf" hidden><span id="filename"></span>
         <form id="page-form" class="page-controls" aria-label="跳转页码"><button id="prev" type="button" title="上一页（←）" aria-label="上一页" disabled>←</button><input id="page" class="page-input" type="number" min="1" step="1" value="1" aria-label="PDF 页码，输入后按回车" title="输入 PDF 页码后按回车" disabled><span id="count" class="count">/ —</span><button id="next" type="button" title="下一页（→）" aria-label="下一页" disabled>→</button></form>
         <div class="control-row"><label for="zoom">页面显示</label><select id="zoom" aria-label="缩放" disabled><option value="page">整页</option><option value="width">适宽</option><option value="1">100%</option><option value="1.5">150%</option><option value="2">200%</option></select></div>
       </div></section>
@@ -77,8 +78,9 @@
       </div></section>
       <section class="panel-section" data-block="page" aria-label="页面操作"><div class="section-heading"><span class="section-icon" aria-hidden="true">↶</span><h2 class="section-label">页面操作</h2></div><div class="section-body"><div class="grid-2"><button id="undo" title="撤销上一步（Ctrl+Z）" disabled>撤销</button><button id="clear" title="清空本页所有标注，可用撤销恢复" disabled>清空本页</button></div><button id="fullscreen" title="全屏（F）">全屏</button></div></section>
       <section class="panel-section" data-block="settings" aria-label="备份与设置"><div class="section-heading"><span class="section-icon" aria-hidden="true">⚙</span><h2 class="section-label">备份与设置</h2></div><div class="section-body">
+        <p id="folder-save-status" class="folder-save-status" role="status" aria-live="polite"></p><button id="save-now" title="将当前备课内容写入教材同名文件夹；等显示已保存后再拔出 U 盘" disabled>立即保存</button>
         <div class="control-row"><label for="panel-side">工具位置</label><select id="panel-side" aria-label="工具栏位置"><option value="right">右侧</option><option value="left">左侧</option></select></div>
-        <details id="more"><summary>标注备份与帮助</summary><div class="menu"><button id="export" title="仅导出已保存的内容，不包含本次展示时的临时修改" disabled>导出备课标注</button><button id="import" disabled>导入备课标注</button><input id="import-file" type="file" accept="application/json,.json" hidden><p>工具栏移出后自动收起。移到边缘“工具”按钮，或点击它，可重新展开；点“固定”可保持展开。</p><p>输入 PDF 页码后按回车。PDF 页码含封面，可能与书上印刷页码不同。</p><p>选择“文字”后点击页面打字；透明框旁的 ⠿ 可拖动位置。</p><p>换电脑时带上原 PDF 和标注备份。备份仅包含备课笔迹、文字、图形及分组，展示时的修改仅本次有效。</p></div></details>
+        <details id="more"><summary>标注备份与帮助</summary><div class="menu"><button id="export" title="仅导出已保存的内容，不包含本次展示时的临时修改" disabled>导出备课标注</button><button id="import" disabled>导入备课标注</button><input id="import-file" type="file" accept="application/json,.json" hidden><p>工具栏移出后自动收起。移到边缘“工具”按钮，或点击它，可重新展开；点“固定”可保持展开。</p><p>输入 PDF 页码后按回车。PDF 页码含封面，可能与书上印刷页码不同。</p><p>选择“文字”后点击页面打字；透明框旁的 ⠿ 可拖动位置。</p><p>通过“打开教材文件夹”授权 PDF 所在目录，数据自动存入 PDF 同名文件夹的“备课数据.json”。换电脑时连同 PDF 和同名文件夹一起携带，并重新选择教材文件夹。拔 U 盘前确认“已保存”。仅打开 PDF 或拖入文件时只保存在浏览器，可导出备份。展示时的修改仅本次有效。</p></div></details>
       </div></section>
     </div>
     <footer id="status" class="status"><span id="message" role="status" aria-live="polite">打开 PDF 后，可手写、打字或使用快捷图形。</span><span id="shortcuts" class="shortcuts">← → 翻页　P 笔　T 文字　E 橡皮　H 拖动</span></footer>
@@ -98,10 +100,11 @@
     </div>
   </aside>
   <main id="stage" class="stage" tabindex="0" aria-label="教材展示区">
-    <section id="empty" class="empty"><div class="welcome"><div class="book-icon" aria-hidden="true">PDF</div><h1>打开教材，直接开讲。</h1><p>选择 PDF → 输入页码 → 手写或打字填写答案</p><p>全部工具收在侧边。移到边缘“工具”按钮即可展开。</p><button id="start">选择 PDF 文件</button><div class="small">也可以把 PDF 拖到这里 · 离线使用 · 文件在本机读取</div></div></section>
+    <section id="empty" class="empty"><div class="welcome"><div class="book-icon" aria-hidden="true">PDF</div><h1>打开教材，直接开讲。</h1><p>选择 PDF 所在文件夹 → 选择教材 → 开始展示</p><p>备课数据保存在 PDF 同名文件夹，可随 U 盘携带。</p><button id="start">选择 PDF 文件</button><div class="small">也可从工具栏仅打开 PDF · 离线使用 · 文件在本机读取</div></div></section>
     <div id="sheet" class="sheet" hidden><canvas id="pdf-canvas"></canvas><canvas id="ink" aria-label="在 PDF 上书写答案"></canvas><div id="text-layer" class="text-layer" aria-label="填写的文字"></div><div id="text-editor" class="text-editor" hidden><textarea id="text-input" maxlength="10000" aria-label="填写答案，支持换行" spellcheck="false"></textarea><button id="text-move" type="button" class="text-move-handle" title="按住拖动文字框" aria-label="拖动文字框">⠿</button></div><div id="step-highlight" class="step-highlight" hidden><span id="step-highlight-label"></span></div></div>
   </main>
   <div id="loading" class="loading" hidden role="status"><span id="loading-text">正在打开 PDF…</span></div>
+  <dialog id="folder-picker" class="folder-picker" aria-labelledby="folder-picker-title"><h2 id="folder-picker-title">选择教材</h2><p>此文件夹有多份 PDF。每份教材的数据分别保存在自己的同名文件夹。</p><div id="folder-pdf-list" class="folder-pdf-list"></div><button id="folder-picker-cancel" type="button">取消</button></dialog>
   <script id="project-license" type="text/plain">                    GNU GENERAL PUBLIC LICENSE
                        Version 3, 29 June 2007
 
@@ -977,6 +980,8 @@ let strokes = {}, history = new Map(), tool = 'pen';
 let pageWidth = 1, pageHeight = 1, pixelRatio = 1;
 let pendingRender, renderPump, renderTask, activePointer, activeStroke, activeShape, eraseBefore;
 let loadingFile = false, storageAvailable = true, saveTimer, resizeTimer;
+let folderStorage, pendingDiskSaves = 0, choosingFolder = false;
+const notesFileName = '备课数据.json';
 let handPosition, textDraft, textMove;
 let selectedColor = '#df3030';
 let textNodes = new Map();
@@ -1016,8 +1021,8 @@ function updateControls() {
   $('clear').disabled = writingBlocked || !(canClear || hasDraft);
   $('clear').textContent = presenting ? '清空随堂笔记' : '清空本页';
   $('clear').title = presenting ? '清除本页临时改动，恢复备课内容并重置到第 0 步；可撤销' : '清空本页所有标注，可用撤销恢复';
-  $('open').disabled = loadingFile;
-  $('start').disabled = loadingFile;
+  for (const id of ['open', 'open-file', 'start']) $(id).disabled = loadingFile || choosingFolder;
+  $('save-now').disabled = noDoc || presenting || !folderStorage || folderStorage.blocked;
   updateRevealControls();
   updateStepsPanel();
 }
@@ -1027,19 +1032,101 @@ function localState() {
 }
 function saveNow() {
   clearTimeout(saveTimer);
-  if (presenting || !pdf || !fingerprint) return;
+  if (presenting || !pdf || !fingerprint) return folderStorage?.queue ?? Promise.resolve();
+  const data = JSON.stringify(localState());
   try {
-    localStorage.setItem(inkStorePrefix + fingerprint, JSON.stringify(localState()));
+    localStorage.setItem(inkStorePrefix + fingerprint, data);
     storageAvailable = true;
-    message('备课笔迹、文字和图形已保存在本机。下次打开相同 PDF 可继续；换电脑请从“标注备份与帮助”导出备份。');
   } catch {
     storageAvailable = false;
-    message('浏览器未能自动保存，请从“标注备份与帮助”导出备课标注备份。', true);
   }
+  const target = folderStorage;
+  if (!target) {
+    message(storageAvailable ? '备课标注仅保存在当前浏览器。要随 U 盘携带，请用“打开教材文件夹”重新打开，或导出备份。' : '浏览器未能自动保存，请导出备课标注备份。', !storageAvailable);
+    return Promise.resolve();
+  }
+  if (target.blocked) {
+    updateFolderStatus();
+    message('备课数据文件无法读取，已阻止覆盖。请先导出备份，并检查文件夹中的数据。', true);
+    return target.queue;
+  }
+  target.dirty = false;
+  if (data === target.queuedData && !target.error) { updateFolderStatus(); return target.queue; }
+  // Each write owns an immutable snapshot and its original directory. A later PDF or
+  // presentation session can never change the data or destination of a queued write.
+  target.queuedData = data;
+  target.pending++;
+  pendingDiskSaves++;
+  updateFolderStatus();
+  target.queue = target.queue.then(async () => {
+    let writer;
+    try {
+      const fileHandle = await target.directory.getFileHandle(notesFileName, {create: true});
+      writer = await fileHandle.createWritable();
+      await writer.write(data);
+      await writer.close();
+      target.missing = false;
+      target.migrating = false;
+      target.error = '';
+    } catch {
+      if (writer?.abort) await writer.abort().catch(() => {});
+      target.error = '写入失败，请检查 U 盘、剩余空间和目录权限，再点“立即保存”重试。';
+      target.queuedData = undefined;
+    } finally {
+      target.pending--;
+      pendingDiskSaves--;
+      if (folderStorage === target) {
+        updateFolderStatus();
+        if (!target.pending) message(target.error || `备课数据已保存到 ${target.path}。`, !!target.error);
+      }
+    }
+  });
+  return target.queue;
 }
 function scheduleSave() {
   clearTimeout(saveTimer);
-  if (!presenting) saveTimer = setTimeout(saveNow, 180);
+  if (!presenting) {
+    if (folderStorage) { folderStorage.dirty = true; updateFolderStatus(); }
+    saveTimer = setTimeout(saveNow, 180);
+  }
+}
+
+function updateFolderStatus() {
+  const status = $('folder-save-status');
+  if (!folderStorage) {
+    status.textContent = typeof window.showDirectoryPicker === 'function'
+      ? '尚未连接教材文件夹；单独打开 PDF 时仅保存在浏览器。'
+      : '此浏览器不支持文件夹保存。请用桌面版 Edge / Chrome，或导出标注备份。';
+    status.classList.remove('error');
+    return;
+  }
+  const target = folderStorage;
+  const state = target.error || (target.pending ? '正在保存，请稍候…' : target.dirty ? '有修改待保存…'
+    : target.migrating ? '已恢复浏览器旧笔记；开启编辑后会保存到此文件夹。'
+    : target.missing ? '文件夹已连接；开启编辑后自动创建数据文件。' : '已保存');
+  status.textContent = `${target.path}\n${state}`;
+  status.classList.toggle('error', !!target.error);
+}
+
+async function readFolderStorage(parent, name, document) {
+  if (!parent) return null;
+  const base = name.replace(/\.pdf$/i, '') || name;
+  const target = {path: `${parent.name}/${base}/${notesFileName}`, directory: null,
+    queue: Promise.resolve(), pending: 0, missing: true, dirty: false, error: '', blocked: false};
+  try {
+    target.directory = await parent.getDirectoryHandle(base, {create: true});
+    let handle;
+    try { handle = await target.directory.getFileHandle(notesFileName); }
+    catch (error) { if (error.name === 'NotFoundError') return target; throw error; }
+    const file = await handle.getFile();
+    if (file.size > 40000000) throw new Error('备课数据文件过大。');
+    target.notes = validateNotes(JSON.parse(await file.text()), document.fingerprints[0], document.numPages);
+    target.missing = false;
+  } catch {
+    target.blocked = true;
+    target.error = '无法读取备课数据，已阻止覆盖。请检查权限、文件格式及是否属于当前 PDF；可导出备份。';
+  }
+  return target;
 }
 
 // Visibility uses a prefix of whole steps; classroom additions join the current step.
@@ -1104,6 +1191,7 @@ function setPresentation(enabled, focus = true, {savePreparation = true} = {}) {
     revealCounts.clear();
     setTool(toolBeforePresentation ?? 'pen');
     toolBeforePresentation = undefined;
+    if (folderStorage?.missing && !folderStorage.blocked) scheduleSave();
   }
   drawInk(); updateControls();
   if (focus) stage.focus({preventScroll: true});
@@ -1391,17 +1479,18 @@ async function initializeLibrary() {
 const libraryReady = initializeLibrary();
 libraryReady.catch(() => message('PDF 阅读组件未能启动，请使用新版 Edge 或 Chrome 打开此网页。', true));
 
-async function openFile(file) {
+async function openFile(file, parentDirectory = null) {
   if (!file || loadingFile) return;
   if (!/\.pdf$/i.test(file.name) && file.type !== 'application/pdf') {
     message('请选择 PDF 文件。', true); return;
   }
   finishInput();
-  if (pdf) saveNow();
+  const outgoingSave = pdf ? saveNow() : Promise.resolve();
   loadingFile = true;
   busy(true, '正在打开 PDF…');
   let newTask;
   try {
+    await outgoingSave;
     await libraryReady;
     const data = new Uint8Array(await file.arrayBuffer());
     newTask = pdfjs.getDocument({data, isEvalSupported: false, enableXfa: false, useWasm: false});
@@ -1411,6 +1500,7 @@ async function openFile(file) {
       updatePassword(password);
     };
     const nextPDF = await newTask.promise;
+    const nextFolder = await readFolderStorage(parentDirectory, file.name, nextPDF);
     pendingRender = null;
     renderTask?.cancel();
     if (renderPump) await renderPump;
@@ -1420,7 +1510,18 @@ async function openFile(file) {
     sheet.hidden = true;
     pdf = nextPDF;
     fingerprint = pdf.fingerprints[0];
+    folderStorage = null;
     restoreNotes();
+    folderStorage = nextFolder;
+    if (nextFolder?.notes) {
+      strokes = nextFolder.notes.strokes;
+      currentPage = nextFolder.notes.page;
+      nextFolder.queuedData = JSON.stringify(localState());
+      delete nextFolder.notes;
+    } else if (nextFolder?.missing && !nextFolder.blocked) {
+      nextFolder.migrating = Object.values(strokes).some(lines => lines.length);
+    }
+    updateFolderStatus();
     $('filename').textContent = file.name;
     $('filename').title = file.name;
     document.title = `${file.name} · PDF 课堂白板`;
@@ -1432,7 +1533,10 @@ async function openFile(file) {
     sheet.hidden = false;
     requestedPage = currentPage;
     await requestRender(currentPage);
-    message(storageAvailable ? '展示中，已保存的答案已隐藏。展示笔记仅本次有效。' : '浏览器未能读取笔记。可开启“编辑”导入标注备份。', !storageAvailable);
+    const readable = nextFolder && !nextFolder.missing && !nextFolder.error || storageAvailable;
+    message(nextFolder?.error || (nextFolder && !nextFolder.missing && !nextFolder.error
+      ? '已从教材同名文件夹读取备课数据，答案已隐藏。展示笔记仅本次有效。'
+      : readable ? '展示中，已保存的答案已隐藏。展示笔记仅本次有效。' : '浏览器未能读取笔记。可开启“编辑”导入标注备份。'), !!nextFolder?.error || !readable);
   } catch (error) {
     if (newTask && newTask !== loadingTask) await newTask.destroy().catch(() => {});
     message(error?.name === 'PasswordException' ? 'PDF 密码未验证，未能打开文件。' : '未能打开 PDF。请确认文件完整，并使用新版 Edge 或 Chrome。', true);
@@ -1890,9 +1994,70 @@ for (const name of ['pointerup', 'pointercancel', 'lostpointercapture']) sheet.a
 });
 
 function chooseFile() { finishInput(); $('file').click(); }
-$('open').onclick = chooseFile;
-$('start').onclick = chooseFile;
+let finishFolderSelection;
+function closeFolderSelection(handle = null) {
+  $('folder-picker').close();
+  finishFolderSelection?.(handle);
+  finishFolderSelection = undefined;
+}
+function selectFolderPDF(handles, directoryName) {
+  $('folder-picker-title').textContent = `选择教材 · ${directoryName}`;
+  $('folder-pdf-list').replaceChildren();
+  for (const handle of handles) {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.textContent = handle.name;
+    button.onclick = () => closeFolderSelection(handle);
+    $('folder-pdf-list').append(button);
+  }
+  return new Promise(resolve => {
+    finishFolderSelection = resolve;
+    $('folder-picker').showModal();
+  });
+}
+async function chooseFolder() {
+  if (loadingFile || choosingFolder) return;
+  if (typeof window.showDirectoryPicker !== 'function') {
+    message('此浏览器不支持文件夹保存。请使用桌面版 Edge / Chrome；也可单独打开 PDF 并导出备份。', true);
+    chooseFile(); return;
+  }
+  finishInput();
+  choosingFolder = true;
+  updateControls();
+  try {
+    const directory = await window.showDirectoryPicker({id: 'pdf-whiteboard-textbooks', mode: 'readwrite'});
+    const handles = [];
+    for await (const handle of directory.values()) {
+      if (handle.kind === 'file' && /\.pdf$/i.test(handle.name)) handles.push(handle);
+    }
+    handles.sort((a, b) => a.name.localeCompare(b.name, 'zh-CN', {numeric: true}));
+    if (!handles.length) { message('此文件夹没有 PDF。请选择 PDF 所在的文件夹。', true); return; }
+    const handle = handles.length === 1 ? handles[0] : await selectFolderPDF(handles, directory.name);
+    if (handle) await openFile(await handle.getFile(), directory);
+  } catch (error) {
+    if (error.name !== 'AbortError') message('未能访问教材文件夹。请检查目录权限；也可单独打开 PDF 并导出备份。', true);
+  } finally {
+    choosingFolder = false;
+    updateControls();
+  }
+}
+$('folder-picker-cancel').onclick = () => closeFolderSelection();
+$('folder-picker').addEventListener('cancel', event => { event.preventDefault(); closeFolderSelection(); });
+$('open').onclick = chooseFolder;
+$('start').onclick = chooseFolder;
+$('open-file').onclick = chooseFile;
 $('file').onchange = event => openFile(event.target.files[0]);
+$('save-now').onclick = async () => {
+  const target = folderStorage;
+  finishInput();
+  await saveNow();
+  if (target && folderStorage === target && !target.error) message(`备课数据已保存到 ${target.path}，可以复制文件夹或安全弹出 U 盘。`);
+};
+if (typeof window.showDirectoryPicker === 'function') {
+  $('open').textContent = '打开教材文件夹';
+  $('start').textContent = '选择教材文件夹';
+}
+updateFolderStatus();
 $('prev').onclick = () => requestRender(requestedPage - 1);
 $('next').onclick = () => requestRender(requestedPage + 1);
 $('page-form').onsubmit = event => {
@@ -1984,7 +2149,7 @@ document.addEventListener('fullscreenchange', () => {
   $('fullscreen').textContent = document.fullscreenElement ? '退出全屏' : '全屏';
 });
 document.addEventListener('keydown', event => {
-  if (event.isComposing || event.keyCode === 229) return;
+  if (loadingFile || $('folder-picker').open || event.isComposing || event.keyCode === 229) return;
   if (event.altKey && !event.ctrlKey && !event.metaKey && !event.shiftKey && event.key.toLowerCase() === 'q') {
     if (!presenting && pdf && !loadingFile && !renderPump && !event.repeat) {
       event.preventDefault();
@@ -2021,6 +2186,10 @@ window.addEventListener('resize', () => {
 });
 document.addEventListener('visibilitychange', () => { if (document.hidden && pdf) { finishInput(); saveNow(); } });
 window.addEventListener('pagehide', () => { if (pdf) { finishInput(); saveNow(); } });
+window.addEventListener('beforeunload', event => {
+  if (pdf) { finishInput(); saveNow(); }
+  if (pendingDiskSaves > 0) { event.preventDefault(); event.returnValue = ''; }
+});
 
 function download(name, data) {
   const url = URL.createObjectURL(new Blob([data], {type: 'application/json'}));

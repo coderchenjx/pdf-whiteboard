@@ -19,6 +19,7 @@ data/
 *.webm
 *-备课标注.json
 *-课堂笔迹.json
+备课数据.json
 *.brainotes
 
 # Credentials, local settings and temporary files

@@ -18,6 +18,8 @@ let strokes = {}, history = new Map(), tool = 'pen';
 let pageWidth = 1, pageHeight = 1, pixelRatio = 1;
 let pendingRender, renderPump, renderTask, activePointer, activeStroke, activeShape, eraseBefore;
 let loadingFile = false, storageAvailable = true, saveTimer, resizeTimer;
+let folderStorage, pendingDiskSaves = 0, choosingFolder = false;
+const notesFileName = '备课数据.json';
 let handPosition, textDraft, textMove;
 let selectedColor = '#df3030';
 let textNodes = new Map();
@@ -57,8 +59,8 @@ function updateControls() {
   $('clear').disabled = writingBlocked || !(canClear || hasDraft);
   $('clear').textContent = presenting ? '清空随堂笔记' : '清空本页';
   $('clear').title = presenting ? '清除本页临时改动，恢复备课内容并重置到第 0 步；可撤销' : '清空本页所有标注，可用撤销恢复';
-  $('open').disabled = loadingFile;
-  $('start').disabled = loadingFile;
+  for (const id of ['open', 'open-file', 'start']) $(id).disabled = loadingFile || choosingFolder;
+  $('save-now').disabled = noDoc || presenting || !folderStorage || folderStorage.blocked;
   updateRevealControls();
   updateStepsPanel();
 }
@@ -68,19 +70,101 @@ function localState() {
 }
 function saveNow() {
   clearTimeout(saveTimer);
-  if (presenting || !pdf || !fingerprint) return;
+  if (presenting || !pdf || !fingerprint) return folderStorage?.queue ?? Promise.resolve();
+  const data = JSON.stringify(localState());
   try {
-    localStorage.setItem(inkStorePrefix + fingerprint, JSON.stringify(localState()));
+    localStorage.setItem(inkStorePrefix + fingerprint, data);
     storageAvailable = true;
-    message('备课笔迹、文字和图形已保存在本机。下次打开相同 PDF 可继续；换电脑请从“标注备份与帮助”导出备份。');
   } catch {
     storageAvailable = false;
-    message('浏览器未能自动保存，请从“标注备份与帮助”导出备课标注备份。', true);
   }
+  const target = folderStorage;
+  if (!target) {
+    message(storageAvailable ? '备课标注仅保存在当前浏览器。要随 U 盘携带，请用“打开教材文件夹”重新打开，或导出备份。' : '浏览器未能自动保存，请导出备课标注备份。', !storageAvailable);
+    return Promise.resolve();
+  }
+  if (target.blocked) {
+    updateFolderStatus();
+    message('备课数据文件无法读取，已阻止覆盖。请先导出备份，并检查文件夹中的数据。', true);
+    return target.queue;
+  }
+  target.dirty = false;
+  if (data === target.queuedData && !target.error) { updateFolderStatus(); return target.queue; }
+  // Each write owns an immutable snapshot and its original directory. A later PDF or
+  // presentation session can never change the data or destination of a queued write.
+  target.queuedData = data;
+  target.pending++;
+  pendingDiskSaves++;
+  updateFolderStatus();
+  target.queue = target.queue.then(async () => {
+    let writer;
+    try {
+      const fileHandle = await target.directory.getFileHandle(notesFileName, {create: true});
+      writer = await fileHandle.createWritable();
+      await writer.write(data);
+      await writer.close();
+      target.missing = false;
+      target.migrating = false;
+      target.error = '';
+    } catch {
+      if (writer?.abort) await writer.abort().catch(() => {});
+      target.error = '写入失败，请检查 U 盘、剩余空间和目录权限，再点“立即保存”重试。';
+      target.queuedData = undefined;
+    } finally {
+      target.pending--;
+      pendingDiskSaves--;
+      if (folderStorage === target) {
+        updateFolderStatus();
+        if (!target.pending) message(target.error || `备课数据已保存到 ${target.path}。`, !!target.error);
+      }
+    }
+  });
+  return target.queue;
 }
 function scheduleSave() {
   clearTimeout(saveTimer);
-  if (!presenting) saveTimer = setTimeout(saveNow, 180);
+  if (!presenting) {
+    if (folderStorage) { folderStorage.dirty = true; updateFolderStatus(); }
+    saveTimer = setTimeout(saveNow, 180);
+  }
+}
+
+function updateFolderStatus() {
+  const status = $('folder-save-status');
+  if (!folderStorage) {
+    status.textContent = typeof window.showDirectoryPicker === 'function'
+      ? '尚未连接教材文件夹；单独打开 PDF 时仅保存在浏览器。'
+      : '此浏览器不支持文件夹保存。请用桌面版 Edge / Chrome，或导出标注备份。';
+    status.classList.remove('error');
+    return;
+  }
+  const target = folderStorage;
+  const state = target.error || (target.pending ? '正在保存，请稍候…' : target.dirty ? '有修改待保存…'
+    : target.migrating ? '已恢复浏览器旧笔记；开启编辑后会保存到此文件夹。'
+    : target.missing ? '文件夹已连接；开启编辑后自动创建数据文件。' : '已保存');
+  status.textContent = `${target.path}\n${state}`;
+  status.classList.toggle('error', !!target.error);
+}
+
+async function readFolderStorage(parent, name, document) {
+  if (!parent) return null;
+  const base = name.replace(/\.pdf$/i, '') || name;
+  const target = {path: `${parent.name}/${base}/${notesFileName}`, directory: null,
+    queue: Promise.resolve(), pending: 0, missing: true, dirty: false, error: '', blocked: false};
+  try {
+    target.directory = await parent.getDirectoryHandle(base, {create: true});
+    let handle;
+    try { handle = await target.directory.getFileHandle(notesFileName); }
+    catch (error) { if (error.name === 'NotFoundError') return target; throw error; }
+    const file = await handle.getFile();
+    if (file.size > 40000000) throw new Error('备课数据文件过大。');
+    target.notes = validateNotes(JSON.parse(await file.text()), document.fingerprints[0], document.numPages);
+    target.missing = false;
+  } catch {
+    target.blocked = true;
+    target.error = '无法读取备课数据，已阻止覆盖。请检查权限、文件格式及是否属于当前 PDF；可导出备份。';
+  }
+  return target;
 }
 
 // Visibility uses a prefix of whole steps; classroom additions join the current step.
@@ -145,6 +229,7 @@ function setPresentation(enabled, focus = true, {savePreparation = true} = {}) {
     revealCounts.clear();
     setTool(toolBeforePresentation ?? 'pen');
     toolBeforePresentation = undefined;
+    if (folderStorage?.missing && !folderStorage.blocked) scheduleSave();
   }
   drawInk(); updateControls();
   if (focus) stage.focus({preventScroll: true});
@@ -432,17 +517,18 @@ async function initializeLibrary() {
 const libraryReady = initializeLibrary();
 libraryReady.catch(() => message('PDF 阅读组件未能启动，请使用新版 Edge 或 Chrome 打开此网页。', true));
 
-async function openFile(file) {
+async function openFile(file, parentDirectory = null) {
   if (!file || loadingFile) return;
   if (!/\.pdf$/i.test(file.name) && file.type !== 'application/pdf') {
     message('请选择 PDF 文件。', true); return;
   }
   finishInput();
-  if (pdf) saveNow();
+  const outgoingSave = pdf ? saveNow() : Promise.resolve();
   loadingFile = true;
   busy(true, '正在打开 PDF…');
   let newTask;
   try {
+    await outgoingSave;
     await libraryReady;
     const data = new Uint8Array(await file.arrayBuffer());
     newTask = pdfjs.getDocument({data, isEvalSupported: false, enableXfa: false, useWasm: false});
@@ -452,6 +538,7 @@ async function openFile(file) {
       updatePassword(password);
     };
     const nextPDF = await newTask.promise;
+    const nextFolder = await readFolderStorage(parentDirectory, file.name, nextPDF);
     pendingRender = null;
     renderTask?.cancel();
     if (renderPump) await renderPump;
@@ -461,7 +548,18 @@ async function openFile(file) {
     sheet.hidden = true;
     pdf = nextPDF;
     fingerprint = pdf.fingerprints[0];
+    folderStorage = null;
     restoreNotes();
+    folderStorage = nextFolder;
+    if (nextFolder?.notes) {
+      strokes = nextFolder.notes.strokes;
+      currentPage = nextFolder.notes.page;
+      nextFolder.queuedData = JSON.stringify(localState());
+      delete nextFolder.notes;
+    } else if (nextFolder?.missing && !nextFolder.blocked) {
+      nextFolder.migrating = Object.values(strokes).some(lines => lines.length);
+    }
+    updateFolderStatus();
     $('filename').textContent = file.name;
     $('filename').title = file.name;
     document.title = `${file.name} · PDF 课堂白板`;
@@ -473,7 +571,10 @@ async function openFile(file) {
     sheet.hidden = false;
     requestedPage = currentPage;
     await requestRender(currentPage);
-    message(storageAvailable ? '展示中，已保存的答案已隐藏。展示笔记仅本次有效。' : '浏览器未能读取笔记。可开启“编辑”导入标注备份。', !storageAvailable);
+    const readable = nextFolder && !nextFolder.missing && !nextFolder.error || storageAvailable;
+    message(nextFolder?.error || (nextFolder && !nextFolder.missing && !nextFolder.error
+      ? '已从教材同名文件夹读取备课数据，答案已隐藏。展示笔记仅本次有效。'
+      : readable ? '展示中，已保存的答案已隐藏。展示笔记仅本次有效。' : '浏览器未能读取笔记。可开启“编辑”导入标注备份。'), !!nextFolder?.error || !readable);
   } catch (error) {
     if (newTask && newTask !== loadingTask) await newTask.destroy().catch(() => {});
     message(error?.name === 'PasswordException' ? 'PDF 密码未验证，未能打开文件。' : '未能打开 PDF。请确认文件完整，并使用新版 Edge 或 Chrome。', true);
@@ -931,9 +1032,70 @@ for (const name of ['pointerup', 'pointercancel', 'lostpointercapture']) sheet.a
 });
 
 function chooseFile() { finishInput(); $('file').click(); }
-$('open').onclick = chooseFile;
-$('start').onclick = chooseFile;
+let finishFolderSelection;
+function closeFolderSelection(handle = null) {
+  $('folder-picker').close();
+  finishFolderSelection?.(handle);
+  finishFolderSelection = undefined;
+}
+function selectFolderPDF(handles, directoryName) {
+  $('folder-picker-title').textContent = `选择教材 · ${directoryName}`;
+  $('folder-pdf-list').replaceChildren();
+  for (const handle of handles) {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.textContent = handle.name;
+    button.onclick = () => closeFolderSelection(handle);
+    $('folder-pdf-list').append(button);
+  }
+  return new Promise(resolve => {
+    finishFolderSelection = resolve;
+    $('folder-picker').showModal();
+  });
+}
+async function chooseFolder() {
+  if (loadingFile || choosingFolder) return;
+  if (typeof window.showDirectoryPicker !== 'function') {
+    message('此浏览器不支持文件夹保存。请使用桌面版 Edge / Chrome；也可单独打开 PDF 并导出备份。', true);
+    chooseFile(); return;
+  }
+  finishInput();
+  choosingFolder = true;
+  updateControls();
+  try {
+    const directory = await window.showDirectoryPicker({id: 'pdf-whiteboard-textbooks', mode: 'readwrite'});
+    const handles = [];
+    for await (const handle of directory.values()) {
+      if (handle.kind === 'file' && /\.pdf$/i.test(handle.name)) handles.push(handle);
+    }
+    handles.sort((a, b) => a.name.localeCompare(b.name, 'zh-CN', {numeric: true}));
+    if (!handles.length) { message('此文件夹没有 PDF。请选择 PDF 所在的文件夹。', true); return; }
+    const handle = handles.length === 1 ? handles[0] : await selectFolderPDF(handles, directory.name);
+    if (handle) await openFile(await handle.getFile(), directory);
+  } catch (error) {
+    if (error.name !== 'AbortError') message('未能访问教材文件夹。请检查目录权限；也可单独打开 PDF 并导出备份。', true);
+  } finally {
+    choosingFolder = false;
+    updateControls();
+  }
+}
+$('folder-picker-cancel').onclick = () => closeFolderSelection();
+$('folder-picker').addEventListener('cancel', event => { event.preventDefault(); closeFolderSelection(); });
+$('open').onclick = chooseFolder;
+$('start').onclick = chooseFolder;
+$('open-file').onclick = chooseFile;
 $('file').onchange = event => openFile(event.target.files[0]);
+$('save-now').onclick = async () => {
+  const target = folderStorage;
+  finishInput();
+  await saveNow();
+  if (target && folderStorage === target && !target.error) message(`备课数据已保存到 ${target.path}，可以复制文件夹或安全弹出 U 盘。`);
+};
+if (typeof window.showDirectoryPicker === 'function') {
+  $('open').textContent = '打开教材文件夹';
+  $('start').textContent = '选择教材文件夹';
+}
+updateFolderStatus();
 $('prev').onclick = () => requestRender(requestedPage - 1);
 $('next').onclick = () => requestRender(requestedPage + 1);
 $('page-form').onsubmit = event => {
@@ -1025,7 +1187,7 @@ document.addEventListener('fullscreenchange', () => {
   $('fullscreen').textContent = document.fullscreenElement ? '退出全屏' : '全屏';
 });
 document.addEventListener('keydown', event => {
-  if (event.isComposing || event.keyCode === 229) return;
+  if (loadingFile || $('folder-picker').open || event.isComposing || event.keyCode === 229) return;
   if (event.altKey && !event.ctrlKey && !event.metaKey && !event.shiftKey && event.key.toLowerCase() === 'q') {
     if (!presenting && pdf && !loadingFile && !renderPump && !event.repeat) {
       event.preventDefault();
@@ -1062,6 +1224,10 @@ window.addEventListener('resize', () => {
 });
 document.addEventListener('visibilitychange', () => { if (document.hidden && pdf) { finishInput(); saveNow(); } });
 window.addEventListener('pagehide', () => { if (pdf) { finishInput(); saveNow(); } });
+window.addEventListener('beforeunload', event => {
+  if (pdf) { finishInput(); saveNow(); }
+  if (pendingDiskSaves > 0) { event.preventDefault(); event.returnValue = ''; }
+});
 
 function download(name, data) {
   const url = URL.createObjectURL(new Blob([data], {type: 'application/json'}));

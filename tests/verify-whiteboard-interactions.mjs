@@ -752,6 +752,178 @@ assert.equal(run('storageAvailable'),false);
 assert.ok(template.includes('id="stage" class="stage" tabindex="0"'));
 assert.equal([...template.matchAll(/<section[^>]*data-block=/g)].length,7);
 
+// File System Access API: keep prepared notes next to the PDF, and carry them to
+// a fresh browser without relying on its localStorage or its drive letter.
+const notFound=()=>Object.assign(new Error('not found'),{name:'NotFoundError'});
+function memoryFile(name,content='') {
+  return {kind:'file',name,content,writes:[],fail:false,active:0,maxActive:0,aborted:0,
+    async getFile(){return {name,type:'application/json',size:Buffer.byteLength(this.content),text:async()=>this.content}},
+    async createWritable(){
+      const file=this;
+      if(file.fail)throw new Error('U disk unavailable');
+      file.active++;file.maxActive=Math.max(file.maxActive,file.active);
+      let draft;
+      return {async write(value){if(file.gate)await file.gate;if(file.failWrite)throw new Error('disk full');draft=value},
+        async close(){file.content=draft;file.writes.push(draft);file.active--},
+        async abort(){file.aborted++;file.active--}};
+    }};
+}
+function memoryDirectory(name,children=[]) {
+  return {kind:'directory',name,entries:new Map(children.map(child=>[child.name,child])),
+    async *values(){yield* this.entries.values()},
+    async getDirectoryHandle(name,options={}){
+      let child=this.entries.get(name);
+      if(!child&&options.create){child=memoryDirectory(name);this.entries.set(name,child)}
+      if(!child)throw notFound();if(child.kind!=='directory')throw new Error('not a directory');return child;
+    },
+    async getFileHandle(name,options={}){
+      let child=this.entries.get(name);
+      if(!child&&options.create){child=memoryFile(name);this.entries.set(name,child)}
+      if(!child)throw notFound();if(child.kind!=='file')throw new Error('not a file');return child;
+    }};
+}
+const pdfHandle=name=>({kind:'file',name,async getFile(){return {name,type:'application/pdf',arrayBuffer:async()=>new ArrayBuffer(1)}}});
+const usbPDF=pdfHandle('英语教材.pdf'), usbDirectory=memoryDirectory('U盘教材',[usbPDF]);
+testContext.usbDirectory=usbDirectory;
+testContext.window.showDirectoryPicker=async options=>{assert.equal(options.mode,'readwrite');return usbDirectory};
+Object.assign(element('folder-picker'),{showModal(){this.open=true},close(){this.open=false}});
+doc.fingerprints=['usb-fixture'];
+await run('chooseFolder()');
+assert.equal(run('presenting'),true);assert.equal(run('visibleAnnotationCount()'),0);
+const notesDirectory=usbDirectory.entries.get('英语教材');
+assert.ok(notesDirectory,'The folder must match the PDF basename exactly');
+assert.equal(notesDirectory.entries.size,0,'Opening for presentation must not create or overwrite a notes file');
+assert.ok(element('folder-save-status').textContent.includes('U盘教材/英语教材/备课数据.json'));
+assert.equal(element('save-now').disabled,true);
+element('reveal-start').click();element('pen').click();draw(100,150);
+element('text').click();pointer('pointerdown',200,300);element('text-input').value='USB answer';element('text-input').emit('input');element('text-done').click();
+element('check').click();pointer('pointerdown',350,400);pointer('pointerup',350,400);
+element('step-group').click();
+const expectedUSB=run('JSON.stringify(localState())');
+await run('saveNow()');
+const notesFile=notesDirectory.entries.get('备课数据.json');
+assert.equal(notesFile.content,expectedUSB);
+assert.equal(JSON.parse(notesFile.content).strokes[1].length,3);
+assert.ok(element('folder-save-status').textContent.endsWith('已保存'));
+assert.equal(run('pendingDiskSaves'),0);
+assert.equal(element('save-now').disabled,false);
+
+// A closing tab is warned while an asynchronous save is incomplete. Writes must
+// remain serialized snapshots even when the app enters presentation meanwhile.
+let releaseDisk;
+notesFile.gate=new Promise(resolve=>{releaseDisk=resolve});
+element('pen').click();draw(200,450);const firstSnapshot=run('JSON.stringify(localState())');
+const firstDiskSave=run('saveNow()');
+draw(250,500);const lastPreparedSnapshot=run('JSON.stringify(localState())');
+const lastDiskSave=run('saveNow()');
+const leaving={prevented:false,preventDefault(){this.prevented=true}};
+dispatchWindow('beforeunload',leaving);assert.equal(leaving.prevented,true);
+element('reveal-start').click();element('reveal-all').click();element('pen').click();draw(350,550);
+run('saveNow()');
+releaseDisk();await firstDiskSave;await lastDiskSave;delete notesFile.gate;
+assert.equal(notesFile.content,lastPreparedSnapshot,'Temporary presentation notes must never enter the disk file');
+assert.ok(notesFile.writes.includes(firstSnapshot),'The first queued write must retain its original immutable snapshot');
+assert.equal(notesFile.maxActive,1,'Writes to one file must be serialized');
+const savedDiskWrites=notesFile.writes.length;
+element('text').click();pointer('pointerdown',200,600);element('text-input').value='temporary classroom text';element('text-input').emit('input');element('text-done').click();
+dispatchDocument('visibilitychange',{});dispatchWindow('pagehide');await run('saveNow()');
+assert.equal(notesFile.writes.length,savedDiskWrites,'Lifecycle events in presentation must never write classroom notes');
+
+// Clear this computer's browser cache to simulate the same USB on another PC.
+saved.clear();
+await run('openFile({name:"英语教材.pdf",type:"application/pdf",arrayBuffer:async()=>new ArrayBuffer(1)},usbDirectory)');
+assert.equal(run('presenting'),true);assert.equal(run('visibleAnnotationCount()'),0);
+assert.deepEqual(JSON.parse(run('JSON.stringify(localState())')),JSON.parse(lastPreparedSnapshot));
+assert.equal(notesFile.writes.length,savedDiskWrites,'Reading an existing USB lesson must be read-only');
+assert.equal(run('revealStepEnds().length'),3,'Prepared grouping and the order of steps must travel with the PDF');
+element('reveal-start').click();
+const cleanExit={prevented:false,preventDefault(){this.prevented=true}};
+dispatchWindow('beforeunload',cleanExit);assert.equal(cleanExit.prevented,false,'An unchanged, saved lesson should close without a warning');
+
+// A full/unplugged disk must retain its previous file and the browser recovery
+// copy; retrying the same data must really attempt another disk write.
+notesFile.failWrite=true;element('pen').click();draw(400,600);
+const retrySnapshot=run('JSON.stringify(localState())');
+await run('saveNow()');
+assert.equal(notesFile.content,lastPreparedSnapshot);
+assert.equal(notesFile.aborted,1);assert.equal(notesFile.active,0);
+assert.equal(saved.get('pdf-classroom-whiteboard-v1:usb-fixture'),retrySnapshot);
+assert.ok(element('folder-save-status').classList.contains('error'));
+assert.ok(element('folder-save-status').textContent.includes('写入失败'));
+notesFile.failWrite=false;await element('save-now').onclick();
+assert.equal(notesFile.content,retrySnapshot);assert.equal(element('folder-save-status').classList.contains('error'),false);
+const previousCacheWriter=testContext.localStorage.setItem;
+testContext.localStorage.setItem=()=>{throw new Error('browser quota')};
+draw(420,620);await run('saveNow()');
+assert.equal(JSON.parse(notesFile.content).strokes[1].length,7,'Folder saving must work even if the browser cache is full');
+assert.ok(element('folder-save-status').textContent.endsWith('已保存'));
+testContext.localStorage.setItem=previousCacheWriter;
+await run('saveNow()');
+
+// Browser-only notes from earlier versions migrate when entering edit mode.
+const legacyDirectory=memoryDirectory('旧教材目录',[pdfHandle('旧教材.pdf')]);
+testContext.legacyDirectory=legacyDirectory;
+await run('openFile({name:"旧教材.pdf",type:"application/pdf",arrayBuffer:async()=>new ArrayBuffer(1)},legacyDirectory)');
+assert.equal(run('folderStorage.migrating'),true);
+assert.equal(legacyDirectory.entries.get('旧教材').entries.size,0);
+element('reveal-start').click();await run('saveNow()');
+assert.equal(JSON.parse(legacyDirectory.entries.get('旧教材').entries.get('备课数据.json').content).strokes[1].length,7);
+
+// Switching PDFs waits for the previous folder to finish saving and cannot
+// redirect a pending write into the next textbook's folder.
+const legacyFile=legacyDirectory.entries.get('旧教材').entries.get('备课数据.json');
+let releaseLegacy;
+legacyFile.gate=new Promise(resolve=>{releaseLegacy=resolve});
+element('pen').click();draw(180,250);const outgoingSnapshot=run('JSON.stringify(localState())');
+const outgoingWrite=run('saveNow()');
+const nextDirectory=memoryDirectory('下一份目录',[pdfHandle('新教材.pdf')]);testContext.nextDirectory=nextDirectory;
+let openedNext=false;
+const openNext=run('openFile({name:"新教材.pdf",type:"application/pdf",arrayBuffer:async()=>new ArrayBuffer(1)},nextDirectory)').then(()=>{openedNext=true});
+await tick();assert.equal(openedNext,false);assert.equal(element('filename').textContent,'旧教材.pdf');
+releaseLegacy();await outgoingWrite;await openNext;delete legacyFile.gate;
+assert.equal(legacyFile.content,outgoingSnapshot);
+assert.equal(element('filename').textContent,'新教材.pdf');assert.equal(run('presenting'),true);
+assert.equal(nextDirectory.entries.get('新教材').entries.size,0,'An outgoing save must not write into the incoming folder');
+
+// An existing file that is malformed or belongs to another PDF must never be
+// replaced with an empty lesson, even after the user starts editing.
+for(const content of ['{broken JSON',JSON.stringify({version:4,fingerprint:'different-pdf',page:1,strokes:{}})]) {
+  const protectedFile=memoryFile('备课数据.json',content);
+  const protectedDirectory=memoryDirectory('受保护教材',[pdfHandle('教材.pdf'),memoryDirectory('教材',[protectedFile])]);
+  testContext.protectedDirectory=protectedDirectory;
+  await run('openFile({name:"教材.pdf",type:"application/pdf",arrayBuffer:async()=>new ArrayBuffer(1)},protectedDirectory)');
+  assert.equal(run('folderStorage.blocked'),true);assert.ok(element('folder-save-status').classList.contains('error'));
+  element('reveal-start').click();element('pen').click();draw(150,200);await run('saveNow()');
+  assert.equal(protectedFile.content,content);assert.equal(protectedFile.writes.length,0);assert.equal(element('save-now').disabled,true);
+}
+
+// Folder selection supports several PDFs, keyboard cancellation, empty folders,
+// and unsupported browsers without resetting the currently displayed lesson.
+const multiple=memoryDirectory('多教材',[pdfHandle('练习10.pdf'),pdfHandle('练习2.pdf'),memoryFile('其他.txt')]);
+testContext.window.showDirectoryPicker=async()=>multiple;
+const choosingMultiple=run('chooseFolder()');await tick();
+assert.equal(element('folder-picker').open,true);
+const progressBeforePickerKey=run('JSON.stringify([...revealCounts])');
+dispatchDocument('keydown',{key:'ArrowDown',target:element('folder-picker-cancel'),preventDefault(){throw new Error('Textbook shortcuts must not intercept modal navigation')}});
+assert.equal(run('JSON.stringify([...revealCounts])'),progressBeforePickerKey);
+assert.deepEqual(element('folder-pdf-list').children.map(button=>button.textContent),['练习2.pdf','练习10.pdf']);
+element('folder-pdf-list').children[1].click();await choosingMultiple;
+assert.equal(element('filename').textContent,'练习10.pdf');
+assert.ok(multiple.entries.has('练习10'));assert.equal(multiple.entries.has('练习2'),false);
+const cancelSelection=run('chooseFolder()');await tick();
+element('folder-picker').emit('cancel',{preventDefault(){}});await cancelSelection;
+assert.equal(element('filename').textContent,'练习10.pdf');assert.equal(run('choosingFolder'),false);
+testContext.window.showDirectoryPicker=async()=>{throw Object.assign(new Error('cancelled'),{name:'AbortError'})};
+await run('chooseFolder()');assert.equal(element('filename').textContent,'练习10.pdf');
+testContext.window.showDirectoryPicker=async()=>memoryDirectory('空目录');
+await run('chooseFolder()');assert.ok(element('message').textContent.includes('没有 PDF'));
+delete testContext.window.showDirectoryPicker;
+let fallbackSelections=0;element('file').onclick=()=>{fallbackSelections++};
+await run('chooseFolder()');assert.equal(fallbackSelections,1);assert.equal(element('filename').textContent,'练习10.pdf');
+await run('openFile({name:"单独打开.pdf",type:"application/pdf",arrayBuffer:async()=>new ArrayBuffer(1)})');
+assert.equal(run('folderStorage'),null,'Opening a bare PDF must not keep the previous PDF’s directory handle');
+assert.equal(element('save-now').disabled,true);
+
 // Render the actual drawing functions to inspect the six icons and transparent interiors.
 const runtimeRequire=createRequire(import.meta.url);
 const {createCanvas}=runtimeRequire('@napi-rs/canvas');
@@ -788,4 +960,4 @@ for(const [i,annotations] of previewSteps.entries()){
 fs.writeFileSync(new URL('whiteboard-step-previews.png',testOutput),thumbnailSheet.toBuffer('image/png'));
 run('clearTimeout(saveTimer); clearTimeout(resizeTimer); sidebarController.cancelHide(); stepsPanelController.cancelHide()');
 for(const value of liveURLs)URL.revokeObjectURL(value);
-console.log('Verified: default classroom mode on first open, reopen from either mode and different PDFs; no visible answer flash, hidden steps panel, explicit preparation entry, no storage overwrite on load; temporary classroom notes, isolated persistence/undo, Alt+Q and previous reveal, step editor, sidebar, audio, palette and compatibility checks.');
+console.log('Verified: USB folder saving, fresh-browser restore, serialized snapshots, temporary-note isolation, legacy migration, failure/retry, corrupt-file protection, folder selection and fallback; default classroom mode, no visible answer flash, isolated persistence/undo, Alt+Q, step editor, sidebar, audio, palette and canvas checks.');
