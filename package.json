@@ -1,0 +1,20 @@
+{
+  "name": "pdf-whiteboard",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Offline PDF annotation whiteboard with editable preparation steps and temporary presentation notes.",
+  "type": "module",
+  "license": "GPL-3.0-only",
+  "engines": {
+    "node": ">=22.13.0"
+  },
+  "scripts": {
+    "build": "node build.mjs",
+    "test": "node tests/verify-whiteboard-interactions.mjs",
+    "package": "node release.mjs"
+  },
+  "devDependencies": {
+    "@napi-rs/canvas": "0.1.100",
+    "pdfjs-dist": "5.6.205"
+  }
+}

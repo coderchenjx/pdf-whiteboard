@@ -1,0 +1,35 @@
+# Dependencies and generated packages / test previews
+node_modules/
+release/
+test-output/
+coverage/
+
+# Private teaching resources and exported notes
+data/
+*.pdf
+*.mp3
+*.wav
+*.m4a
+*.aac
+*.ogg
+*.flac
+*.opus
+*.wma
+*.mp4
+*.webm
+*-备课标注.json
+*-课堂笔迹.json
+*.brainotes
+
+# Credentials, local settings and temporary files
+.env
+.env.*
+.npmrc
+.codex/
+*.log
+*.tmp
+*.bak
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
