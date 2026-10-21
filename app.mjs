@@ -562,7 +562,7 @@ async function openFile(file, parentDirectory = null) {
     updateFolderStatus();
     $('filename').textContent = file.name;
     $('filename').title = file.name;
-    document.title = `${file.name} · PDF 课堂白板`;
+    document.title = `${file.name} · PDF 课堂白板 ${$('app-version').textContent}`;
     $('count').textContent = `/ ${pdf.numPages}`;
     $('page').max = pdf.numPages;
     $('empty').hidden = true;

@@ -1,6 +1,6 @@
 {
   "name": "pdf-whiteboard",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "description": "Offline PDF annotation whiteboard with editable preparation steps and temporary presentation notes.",
   "type": "module",

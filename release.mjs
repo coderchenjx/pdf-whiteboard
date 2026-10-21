@@ -9,7 +9,7 @@ const root = path.dirname(fileURLToPath(import.meta.url));
 const built = spawnSync(process.execPath, [path.join(root, 'build.mjs'), ...process.argv.slice(2)], {stdio: 'inherit'});
 if (built.status !== 0) throw new Error('Build failed; no release folder was created.');
 const files = [
-  'README.md', 'LICENSE', 'THIRD_PARTY_NOTICES.md', 'CONTRIBUTING.md', '发布到GitHub.md',
+  'README.md', 'LICENSE', 'THIRD_PARTY_NOTICES.md', 'CONTRIBUTING.md',
   '.gitignore', 'package.json', 'app.mjs', 'viewer.template.html', 'build.mjs', 'release.mjs',
   'PDF课堂白板.html', 'PDFjs-LICENSE.txt', '使用说明.txt',
   'tests/verify-whiteboard-interactions.mjs', '.github/workflows/check.yml',

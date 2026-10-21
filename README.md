@@ -1,5 +1,7 @@
 # PDF Whiteboard / PDF 课堂白板
 
+当前版本：**v0.2.0**。可在工具栏底部和浏览器标题查看版本号。
+
 在 PDF 原文上书写、输入文字和绘制图形，备课时组织答案，展示时按步骤公布。无需将练习册重新排版为 PPT。
 
 这是一个离线网页工具。打开本机 PDF 和音频即可使用，不需要账号或服务器，教材和笔记不会由本应用上传。
@@ -73,6 +75,8 @@ npm run build
 
 构建会将 PDF.js 阅读器、Worker、应用代码及许可证嵌入 `PDF课堂白板.html`，生成不依赖 CDN 的单文件网页。
 
+发布新版本时，修改 `package.json` 的 `version` 并同步本文和使用说明中的版本号，再执行 `npm run build`；网页中的版本号由构建自动写入。软件版本号独立于备课数据格式版本，升级后可继续读取已有备课数据。
+
 也可显式指定已有的 PDF.js 安装目录：
 
 ```sh
@@ -99,7 +103,7 @@ npm run package
 
 命令先构建，再在 `release/github-upload-*` 中生成只包含发布文件的文件夹，不复制 `data/`、教材 PDF、音频或个人笔记。
 
-创建 GitHub 仓库和首次上传的操作见 [发布到 GitHub](发布到GitHub.md)。贡献方式见 [CONTRIBUTING.md](CONTRIBUTING.md)。
+贡献方式见 [CONTRIBUTING.md](CONTRIBUTING.md)。
 
 ## 许可证
 
